@@ -1,0 +1,6 @@
+Place your practice audio here as:
+
+assets/audio/guiyi.mp3
+
+If you prefer to host the audio elsewhere, edit assets/site-config.js
+and replace `audioUrl` with your own HTTPS URL.

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>皈依共修</title>
+    <meta
+      name="description"
+      content="每日东八区早上 6 点同步进行的共修页面，支持音频字幕滚动与在线名单。"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./assets/site-config.js" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <p class="eyebrow">Daily Practice Room</p>
+        <h1 id="site-title">皈依共修</h1>
+        <p class="hero-copy" id="site-description">
+          每天东八区早上 6:00 开始，同步音频进度、字幕滚动与在线名单。
+        </p>
+        <div class="hero-meta">
+          <div class="meta-pill">
+            <span class="meta-label">时区</span>
+            <strong id="timezone-label">UTC+8</strong>
+          </div>
+          <div class="meta-pill">
+            <span class="meta-label">开播时间</span>
+            <strong id="start-time-label">06:00</strong>
+          </div>
+          <div class="meta-pill">
+            <span class="meta-label">房间状态</span>
+            <strong id="room-status-pill">准备中</strong>
+          </div>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="panel panel-player">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">共修播放器</p>
+              <h2>同步当前进度</h2>
+            </div>
+            <button class="button button-ghost" id="sync-button" type="button">
+              同步到现场
+            </button>
+          </div>
+
+          <div class="session-banner">
+            <p id="session-status">正在读取今天的共修状态…</p>
+            <p id="session-substatus">如果网页保持打开，6:00 到点会尝试自动开播。</p>
+          </div>
+
+          <div class="player-card">
+            <div class="player-controls">
+              <button class="button button-primary" id="play-button" type="button">
+                播放
+              </button>
+              <button class="button" id="pause-button" type="button">暂停</button>
+              <button class="button" id="restart-button" type="button">从头开始</button>
+            </div>
+
+            <label class="range-wrap" for="progress-range">
+              <span>播放进度</span>
+              <input id="progress-range" type="range" min="0" max="1000" value="0" />
+            </label>
+
+            <div class="time-row">
+              <span id="current-time">00:00</span>
+              <span id="duration-time">00:00</span>
+            </div>
+
+            <label class="name-form" for="display-name">
+              <span>名字 / 法名</span>
+              <div class="name-row">
+                <input
+                  id="display-name"
+                  name="display-name"
+                  type="text"
+                  maxlength="24"
+                  placeholder="例如：慧明 / 王小明"
+                  autocomplete="name"
+                />
+                <button class="button button-primary" id="join-button" type="button">
+                  加入共修
+                </button>
+              </div>
+            </label>
+
+            <div class="toggle-row">
+              <label class="checkbox">
+                <input id="auto-start-toggle" type="checkbox" />
+                <span>允许 6:00 自动开播（需本机浏览器先有一次交互）</span>
+              </label>
+            </div>
+
+            <p class="helper-text" id="autoplay-note">
+              浏览器限制下，完全无交互的新访客通常不能被强制自动播放。
+            </p>
+            <p class="helper-text" id="audio-note"></p>
+
+            <audio id="practice-audio" preload="metadata"></audio>
+          </div>
+        </section>
+
+        <section class="panel panel-lyrics">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">字幕滚动</p>
+              <h2>仪轨字幕</h2>
+            </div>
+            <p class="lyrics-tip">点击任一行可跳转到该句。</p>
+          </div>
+          <div class="lyrics-frame">
+            <ol class="lyrics-list" id="lyrics-list">
+              <li class="lyrics-empty">正在加载字幕…</li>
+            </ol>
+          </div>
+        </section>
+
+        <aside class="panel panel-side">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">在场共修</p>
+              <h2>在线名单</h2>
+            </div>
+            <span class="count-badge" id="attendee-count">0 人</span>
+          </div>
+
+          <ul class="attendee-list" id="attendee-list">
+            <li class="attendee-empty">尚未加入共修。</li>
+          </ul>
+
+          <div class="notes">
+            <h3>部署说明</h3>
+            <ul>
+              <li>页面可直接放在 GitHub Pages。</li>
+              <li>在线人数与名单需要额外接一个数据库，推荐 Supabase。</li>
+              <li>若 6:00 后才进入，可用“同步到现场”直接追上当天进度。</li>
+            </ul>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </body>
+</html>
