@@ -364,7 +364,7 @@ function updateAudioNote() {
   }
 
   dom.audioNote.textContent =
-    "若你用 GitHub Pages 部署，请确保音频是 HTTPS 地址，或直接放在当前仓库内。";
+    "若暂时无法播放，请稍后重试，或先点一次播放按钮。";
   dom.audioNote.classList.remove("is-warning");
 }
 
