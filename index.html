@@ -75,22 +75,23 @@
               <span id="duration-time">00:00</span>
             </div>
 
-            <label class="name-form" for="display-name">
+            <div class="name-form">
               <span>名字 / 法名</span>
-              <div class="name-row">
-                <input
-                  id="display-name"
-                  name="display-name"
-                  type="text"
-                  maxlength="24"
-                  placeholder="例如：慧明 / 王小明"
-                  autocomplete="name"
-                />
-                <button class="button button-primary" id="join-button" type="button">
-                  加入共修
-                </button>
+              <div class="identity-card">
+                <div class="identity-copy">
+                  <strong id="identity-name">尚未设置名字</strong>
+                  <p id="identity-note">第一次输入一次，之后本设备可自动加入共修。</p>
+                </div>
+                <div class="identity-actions">
+                  <button class="button button-primary" id="join-button" type="button">
+                    输入名字并加入
+                  </button>
+                  <button class="button" id="edit-name-button" type="button">
+                    修改名字
+                  </button>
+                </div>
               </div>
-            </label>
+            </div>
 
             <div class="toggle-row">
               <label class="checkbox">
@@ -146,6 +147,56 @@
           </div>
         </aside>
       </main>
+    </div>
+
+    <div class="modal-shell" id="name-modal" hidden>
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div
+        class="modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="name-modal-title"
+      >
+        <div class="modal-head">
+          <div>
+            <p class="panel-kicker">身份确认</p>
+            <h2 id="name-modal-title">输入名字或法名</h2>
+          </div>
+          <button class="button button-ghost" id="modal-cancel-button" type="button">
+            关闭
+          </button>
+        </div>
+
+        <label class="modal-field" for="modal-display-name">
+          <span>名字 / 法名</span>
+          <input
+            id="modal-display-name"
+            name="modal-display-name"
+            type="text"
+            maxlength="24"
+            placeholder="例如：慧明 / 王小明"
+            autocomplete="name"
+          />
+        </label>
+
+        <label class="checkbox checkbox-stack">
+          <input id="remember-join-toggle" type="checkbox" checked />
+          <span>记住这个名字，并在本设备下次自动加入</span>
+        </label>
+
+        <p class="helper-text modal-helper">
+          之后随时都可以修改名字；若只是暂时离开，可直接退出本场共修。
+        </p>
+
+        <div class="modal-actions">
+          <button class="button" id="modal-secondary-button" type="button">
+            稍后再说
+          </button>
+          <button class="button button-primary" id="modal-confirm-button" type="button">
+            确认加入
+          </button>
+        </div>
+      </div>
     </div>
   </body>
 </html>

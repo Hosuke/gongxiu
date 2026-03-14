@@ -200,7 +200,6 @@ body::before {
 }
 
 .player-controls,
-.name-row,
 .toggle-row,
 .time-row {
   display: flex;
@@ -279,19 +278,34 @@ input[type="range"] {
   margin-top: 18px;
 }
 
-.name-row {
-  gap: 10px;
+.identity-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 253, 247, 0.92);
 }
 
-.name-row input {
-  flex: 1;
-  min-width: 0;
-  padding: 12px 14px;
-  border: 1px solid rgba(103, 82, 49, 0.16);
-  border-radius: 16px;
-  background: #fffdf7;
-  font: inherit;
-  color: var(--text);
+.identity-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.identity-copy strong {
+  font-size: 18px;
+}
+
+.identity-copy p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.identity-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .checkbox {
@@ -308,6 +322,86 @@ input[type="range"] {
   color: var(--muted);
   font-size: 14px;
   line-height: 1.6;
+}
+
+.modal-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.modal-shell[hidden] {
+  display: none;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(48, 34, 18, 0.44);
+  backdrop-filter: blur(10px);
+}
+
+.modal-card {
+  position: relative;
+  width: min(100%, 520px);
+  padding: 24px;
+  border: 1px solid rgba(118, 92, 47, 0.14);
+  border-radius: 26px;
+  background:
+    linear-gradient(180deg, rgba(255, 250, 241, 0.98), rgba(248, 240, 224, 0.96));
+  box-shadow: 0 36px 80px rgba(55, 39, 16, 0.28);
+}
+
+.modal-head {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.modal-head h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.modal-field {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.modal-field span {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.modal-field input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(103, 82, 49, 0.16);
+  border-radius: 16px;
+  background: #fffdf7;
+  font: inherit;
+  color: var(--text);
+}
+
+.checkbox-stack {
+  margin-top: 18px;
+  align-items: flex-start;
+}
+
+.modal-helper {
+  margin-top: 12px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
 }
 
 #practice-audio {
@@ -469,13 +563,25 @@ input[type="range"] {
   .panel-head,
   .hero-meta,
   .player-controls,
-  .name-row {
+  .identity-actions,
+  .modal-actions {
     flex-direction: column;
     align-items: stretch;
   }
 
   .button,
-  .name-row input {
+  .modal-field input {
     width: 100%;
+  }
+
+  .modal-shell {
+    padding: 12px;
+    align-items: end;
+  }
+
+  .modal-card {
+    width: 100%;
+    border-radius: 24px 24px 0 0;
+    padding: 20px;
   }
 }

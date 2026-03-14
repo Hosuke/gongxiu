@@ -8,10 +8,13 @@ const state = {
   attendancePollId: null,
   heartbeatId: null,
   joined: false,
+  displayName: "",
   autoStartEnabled: localStorage.getItem("gongxiu:autoStart") === "1",
+  autoJoinEnabled: localStorage.getItem("gongxiu:autoJoinAttendance") !== "0",
   clientId: getOrCreateClientId(),
   playbackUnlocked: false,
   sessionKey: null,
+  modalOpen: false,
 };
 
 const dom = {};
@@ -25,12 +28,17 @@ async function init() {
   dom.autoStartToggle.checked = state.autoStartEnabled;
   dom.audio.src = config.audioUrl || "";
   dom.audio.load();
-  restoreName();
+  restoreIdentity();
+  renderIdentity();
   updateAudioNote();
   updateDurationUi();
   startClock();
   await loadLyrics();
-  await refreshAttendees();
+  if (state.displayName && state.autoJoinEnabled) {
+    await joinPractice({ auto: true });
+  } else {
+    await refreshAttendees();
+  }
 }
 
 function cacheDom() {
@@ -48,8 +56,10 @@ function cacheDom() {
   dom.progressRange = document.querySelector("#progress-range");
   dom.currentTime = document.querySelector("#current-time");
   dom.durationTime = document.querySelector("#duration-time");
-  dom.displayName = document.querySelector("#display-name");
+  dom.identityName = document.querySelector("#identity-name");
+  dom.identityNote = document.querySelector("#identity-note");
   dom.joinButton = document.querySelector("#join-button");
+  dom.editNameButton = document.querySelector("#edit-name-button");
   dom.autoStartToggle = document.querySelector("#auto-start-toggle");
   dom.autoplayNote = document.querySelector("#autoplay-note");
   dom.audioNote = document.querySelector("#audio-note");
@@ -57,6 +67,12 @@ function cacheDom() {
   dom.lyricsList = document.querySelector("#lyrics-list");
   dom.attendeeCount = document.querySelector("#attendee-count");
   dom.attendeeList = document.querySelector("#attendee-list");
+  dom.nameModal = document.querySelector("#name-modal");
+  dom.modalDisplayName = document.querySelector("#modal-display-name");
+  dom.rememberJoinToggle = document.querySelector("#remember-join-toggle");
+  dom.modalCancelButton = document.querySelector("#modal-cancel-button");
+  dom.modalSecondaryButton = document.querySelector("#modal-secondary-button");
+  dom.modalConfirmButton = document.querySelector("#modal-confirm-button");
 }
 
 function applySiteCopy() {
@@ -80,11 +96,18 @@ function bindEvents() {
   });
   dom.progressRange.addEventListener("input", onSeekInput);
   dom.joinButton.addEventListener("click", onJoinButtonClick);
+  dom.editNameButton.addEventListener("click", openNameModal);
   dom.autoStartToggle.addEventListener("change", onAutoStartToggleChange);
+  dom.modalCancelButton.addEventListener("click", closeNameModal);
+  dom.modalSecondaryButton.addEventListener("click", closeNameModal);
+  dom.modalConfirmButton.addEventListener("click", onModalConfirm);
+  dom.modalDisplayName.addEventListener("keydown", onModalInputKeyDown);
+  dom.nameModal.addEventListener("click", onModalShellClick);
   dom.audio.addEventListener("loadedmetadata", onLoadedMetadata);
   dom.audio.addEventListener("timeupdate", onTimeUpdate);
   dom.audio.addEventListener("ended", onAudioEnded);
   document.addEventListener("pointerdown", markPlaybackInteraction, { once: true });
+  document.addEventListener("keydown", onDocumentKeyDown);
   window.addEventListener("beforeunload", onBeforeUnload);
 }
 
@@ -375,34 +398,31 @@ function updateDurationUi() {
   );
 }
 
-function restoreName() {
+function restoreIdentity() {
   const savedName = localStorage.getItem("gongxiu:displayName");
-  if (savedName) {
-    dom.displayName.value = savedName;
+  state.displayName = savedName ? savedName.trim() : "";
+
+  const savedAutoJoin = localStorage.getItem("gongxiu:autoJoinAttendance");
+  if (savedAutoJoin !== null) {
+    state.autoJoinEnabled = savedAutoJoin === "1";
   }
+
+  dom.modalDisplayName.value = state.displayName;
+  dom.rememberJoinToggle.checked = state.autoJoinEnabled;
 }
 
 async function onJoinButtonClick() {
-  const name = dom.displayName.value.trim();
-  if (!name) {
-    dom.displayName.focus();
-    return;
-  }
-
-  localStorage.setItem("gongxiu:displayName", name);
-
   if (state.joined) {
-    stopPresence();
-    state.joined = false;
-    dom.joinButton.textContent = "加入共修";
-    await refreshAttendees();
+    await leavePractice();
     return;
   }
 
-  state.joined = true;
-  dom.joinButton.textContent = "离开名单";
-  await upsertAttendance();
-  startPresence();
+  if (!state.displayName) {
+    openNameModal();
+    return;
+  }
+
+  await joinPractice();
 }
 
 function startPresence() {
@@ -424,7 +444,7 @@ function stopPresence() {
 }
 
 async function upsertAttendance() {
-  const name = dom.displayName.value.trim();
+  const name = state.displayName.trim();
   if (!name) {
     return;
   }
@@ -476,7 +496,7 @@ async function upsertAttendance() {
 
 async function refreshAttendees() {
   if (!hasSupabaseConfig()) {
-    const name = dom.displayName.value.trim();
+    const name = state.displayName.trim();
     if (!state.joined || !name) {
       renderAttendees([]);
       return;
@@ -547,6 +567,112 @@ function renderAttendees(rows) {
     fragment.appendChild(item);
   });
   dom.attendeeList.appendChild(fragment);
+}
+
+function renderIdentity() {
+  if (state.displayName) {
+    dom.identityName.textContent = state.displayName;
+    dom.identityNote.textContent = state.autoJoinEnabled
+      ? "已在本设备记住名字，之后进入会自动加入共修。"
+      : "已记住这个名字；需要时可手动加入共修。";
+    dom.editNameButton.hidden = false;
+    dom.joinButton.textContent = state.joined ? "离开本场" : "加入共修";
+    return;
+  }
+
+  dom.identityName.textContent = "尚未设置名字";
+  dom.identityNote.textContent = "第一次输入一次，之后本设备可自动加入共修。";
+  dom.editNameButton.hidden = true;
+  dom.joinButton.textContent = "输入名字并加入";
+}
+
+async function joinPractice(options = {}) {
+  if (!state.displayName) {
+    return;
+  }
+
+  state.joined = true;
+  renderIdentity();
+  await upsertAttendance();
+  startPresence();
+
+  if (!options.auto) {
+    dom.audioNote.textContent = `已加入共修：${state.displayName}`;
+    dom.audioNote.classList.remove("is-warning");
+  }
+}
+
+async function leavePractice() {
+  stopPresence();
+  state.joined = false;
+  renderIdentity();
+  dom.audioNote.textContent = "你已离开本场共修，名字仍保存在本设备中。";
+  dom.audioNote.classList.remove("is-warning");
+  await refreshAttendees();
+}
+
+function persistIdentity() {
+  if (state.displayName) {
+    localStorage.setItem("gongxiu:displayName", state.displayName);
+  } else {
+    localStorage.removeItem("gongxiu:displayName");
+  }
+  localStorage.setItem("gongxiu:autoJoinAttendance", state.autoJoinEnabled ? "1" : "0");
+}
+
+function openNameModal() {
+  state.modalOpen = true;
+  dom.nameModal.hidden = false;
+  dom.modalDisplayName.value = state.displayName;
+  dom.rememberJoinToggle.checked = state.autoJoinEnabled;
+
+  window.requestAnimationFrame(() => {
+    dom.modalDisplayName.focus();
+    dom.modalDisplayName.select();
+  });
+}
+
+function closeNameModal() {
+  state.modalOpen = false;
+  dom.nameModal.hidden = true;
+}
+
+async function onModalConfirm() {
+  const nextName = dom.modalDisplayName.value.trim();
+  if (!nextName) {
+    dom.modalDisplayName.focus();
+    return;
+  }
+
+  state.displayName = nextName;
+  state.autoJoinEnabled = dom.rememberJoinToggle.checked;
+  persistIdentity();
+  renderIdentity();
+  closeNameModal();
+  await joinPractice();
+}
+
+function onModalInputKeyDown(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    onModalConfirm();
+  }
+}
+
+function onModalShellClick(event) {
+  const target = event.target;
+  if (!(target instanceof HTMLElement)) {
+    return;
+  }
+  if (target.dataset.closeModal === "true") {
+    closeNameModal();
+  }
+}
+
+function onDocumentKeyDown(event) {
+  if (event.key === "Escape" && state.modalOpen) {
+    closeNameModal();
+  }
 }
 
 function hasSupabaseConfig() {
