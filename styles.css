@@ -324,6 +324,47 @@ input[type="range"] {
   line-height: 1.6;
 }
 
+.toast-stack {
+  position: fixed;
+  right: 18px;
+  bottom: 20px;
+  z-index: 45;
+  display: grid;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  min-width: min(360px, calc(100vw - 32px));
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 14px 16px;
+  border: 1px solid rgba(118, 92, 47, 0.14);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 250, 241, 0.97), rgba(248, 240, 224, 0.94));
+  box-shadow: 0 22px 48px rgba(55, 39, 16, 0.18);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-title {
+  display: block;
+  font-weight: 700;
+}
+
+.toast-copy {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
 .modal-shell {
   position: fixed;
   inset: 0;
@@ -577,6 +618,17 @@ input[type="range"] {
   .modal-shell {
     padding: 12px;
     align-items: end;
+  }
+
+  .toast-stack {
+    right: 12px;
+    left: 12px;
+    bottom: 12px;
+  }
+
+  .toast {
+    min-width: 0;
+    max-width: none;
   }
 
   .modal-card {

@@ -7,6 +7,7 @@ const state = {
   sessionTimerId: null,
   attendancePollId: null,
   heartbeatId: null,
+  autoJoinTimerId: null,
   joined: false,
   displayName: "",
   autoStartEnabled: localStorage.getItem("gongxiu:autoStart") === "1",
@@ -15,6 +16,7 @@ const state = {
   playbackUnlocked: false,
   sessionKey: null,
   modalOpen: false,
+  autoJoinPending: false,
 };
 
 const dom = {};
@@ -35,7 +37,7 @@ async function init() {
   startClock();
   await loadLyrics();
   if (state.displayName && state.autoJoinEnabled) {
-    await joinPractice({ auto: true });
+    scheduleSilentAutoJoin();
   } else {
     await refreshAttendees();
   }
@@ -67,6 +69,7 @@ function cacheDom() {
   dom.lyricsList = document.querySelector("#lyrics-list");
   dom.attendeeCount = document.querySelector("#attendee-count");
   dom.attendeeList = document.querySelector("#attendee-list");
+  dom.toastStack = document.querySelector("#toast-stack");
   dom.nameModal = document.querySelector("#name-modal");
   dom.modalDisplayName = document.querySelector("#modal-display-name");
   dom.rememberJoinToggle = document.querySelector("#remember-join-toggle");
@@ -391,6 +394,17 @@ function updateAudioNote() {
   dom.audioNote.classList.remove("is-warning");
 }
 
+function scheduleSilentAutoJoin() {
+  clearTimeout(state.autoJoinTimerId);
+  state.autoJoinPending = true;
+  renderIdentity();
+  state.autoJoinTimerId = window.setTimeout(async () => {
+    state.autoJoinPending = false;
+    renderIdentity();
+    await joinPractice({ auto: true, showToast: true });
+  }, 1200);
+}
+
 function updateDurationUi() {
   dom.durationTime.textContent = formatTime(state.sessionDurationSeconds || 0);
   dom.progressRange.max = String(
@@ -572,9 +586,15 @@ function renderAttendees(rows) {
 function renderIdentity() {
   if (state.displayName) {
     dom.identityName.textContent = state.displayName;
-    dom.identityNote.textContent = state.autoJoinEnabled
-      ? "已在本设备记住名字，之后进入会自动加入共修。"
-      : "已记住这个名字；需要时可手动加入共修。";
+    if (state.autoJoinPending) {
+      dom.identityNote.textContent = "正在恢复本设备身份，即将自动加入共修。";
+    } else if (state.autoJoinEnabled) {
+      dom.identityNote.textContent = state.joined
+        ? "已在本设备自动恢复身份，当前正在共修中。"
+        : "已在本设备记住名字，之后进入会自动加入共修。";
+    } else {
+      dom.identityNote.textContent = "已记住这个名字；需要时可手动加入共修。";
+    }
     dom.editNameButton.hidden = false;
     dom.joinButton.textContent = state.joined ? "离开本场" : "加入共修";
     return;
@@ -595,6 +615,10 @@ async function joinPractice(options = {}) {
   renderIdentity();
   await upsertAttendance();
   startPresence();
+
+  if (options.showToast) {
+    showToast("欢迎回来", `已自动以“${state.displayName}”加入本场共修。`);
+  }
 
   if (!options.auto) {
     dom.audioNote.textContent = `已加入共修：${state.displayName}`;
@@ -690,6 +714,28 @@ function supabaseHeaders(extra = {}) {
 
 function onBeforeUnload() {
   stopPresence();
+  clearTimeout(state.autoJoinTimerId);
+}
+
+function showToast(title, copy) {
+  const item = document.createElement("div");
+  item.className = "toast";
+  item.innerHTML = `
+    <strong class="toast-title">${escapeHtml(title)}</strong>
+    <span class="toast-copy">${escapeHtml(copy)}</span>
+  `;
+  dom.toastStack.appendChild(item);
+
+  window.requestAnimationFrame(() => {
+    item.classList.add("is-visible");
+  });
+
+  window.setTimeout(() => {
+    item.classList.remove("is-visible");
+    window.setTimeout(() => {
+      item.remove();
+    }, 220);
+  }, 3200);
 }
 
 function getSessionWindow(now = Date.now()) {
