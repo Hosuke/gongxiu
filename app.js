@@ -17,6 +17,7 @@ const state = {
   sessionKey: null,
   modalOpen: false,
   autoJoinPending: false,
+  sidebarOpen: false,
 };
 
 const dom = {};
@@ -26,6 +27,7 @@ document.addEventListener("DOMContentLoaded", init);
 async function init() {
   cacheDom();
   applySiteCopy();
+  renderPracticeVersions();
   bindEvents();
   dom.autoStartToggle.checked = state.autoStartEnabled;
   dom.audio.src = config.audioUrl || "";
@@ -61,7 +63,13 @@ function cacheDom() {
   dom.identityName = document.querySelector("#identity-name");
   dom.identityNote = document.querySelector("#identity-note");
   dom.joinButton = document.querySelector("#join-button");
+  dom.quickJoinButton = document.querySelector("#quick-join-button");
   dom.editNameButton = document.querySelector("#edit-name-button");
+  dom.sidebarToggleButton = document.querySelector("#sidebar-toggle-button");
+  dom.sidebarCloseButton = document.querySelector("#sidebar-close-button");
+  dom.sidebarBackdrop = document.querySelector("#sidebar-backdrop");
+  dom.panelSide = document.querySelector(".panel-side");
+  dom.versionList = document.querySelector("#version-list");
   dom.autoStartToggle = document.querySelector("#auto-start-toggle");
   dom.autoplayNote = document.querySelector("#autoplay-note");
   dom.audioNote = document.querySelector("#audio-note");
@@ -99,7 +107,11 @@ function bindEvents() {
   });
   dom.progressRange.addEventListener("input", onSeekInput);
   dom.joinButton.addEventListener("click", onJoinButtonClick);
+  dom.quickJoinButton.addEventListener("click", onJoinButtonClick);
   dom.editNameButton.addEventListener("click", openNameModal);
+  dom.sidebarToggleButton.addEventListener("click", openSidebar);
+  dom.sidebarCloseButton.addEventListener("click", closeSidebar);
+  dom.sidebarBackdrop.addEventListener("click", closeSidebar);
   dom.autoStartToggle.addEventListener("change", onAutoStartToggleChange);
   dom.modalCancelButton.addEventListener("click", closeNameModal);
   dom.modalSecondaryButton.addEventListener("click", closeNameModal);
@@ -597,6 +609,9 @@ function renderIdentity() {
     }
     dom.editNameButton.hidden = false;
     dom.joinButton.textContent = state.joined ? "离开本场" : "加入共修";
+    dom.quickJoinButton.textContent = state.joined
+      ? "离开本场"
+      : `以 ${state.displayName} 加入`;
     return;
   }
 
@@ -604,6 +619,7 @@ function renderIdentity() {
   dom.identityNote.textContent = "第一次输入一次，之后本设备可自动加入共修。";
   dom.editNameButton.hidden = true;
   dom.joinButton.textContent = "输入名字并加入";
+  dom.quickJoinButton.textContent = "开始共修";
 }
 
 async function joinPractice(options = {}) {
@@ -696,6 +712,11 @@ function onModalShellClick(event) {
 function onDocumentKeyDown(event) {
   if (event.key === "Escape" && state.modalOpen) {
     closeNameModal();
+    return;
+  }
+
+  if (event.key === "Escape" && state.sidebarOpen) {
+    closeSidebar();
   }
 }
 
@@ -715,6 +736,74 @@ function supabaseHeaders(extra = {}) {
 function onBeforeUnload() {
   stopPresence();
   clearTimeout(state.autoJoinTimerId);
+}
+
+function renderPracticeVersions() {
+  const versions = Array.isArray(config.practiceVersions) && config.practiceVersions.length
+    ? config.practiceVersions
+    : [
+        {
+          id: "default",
+          title: config.siteTitle || "当前共修",
+          subtitle: "当前开放版本，可直接进入共修。",
+          status: "current",
+        },
+      ];
+
+  dom.versionList.innerHTML = "";
+  const fragment = document.createDocumentFragment();
+
+  versions.forEach((version) => {
+    const item = document.createElement("li");
+    const status = version.status || "current";
+    item.className = `version-item ${status === "current" ? "is-current" : "is-coming"}`;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.innerHTML = `
+      <span class="version-title-row">
+        <span class="version-title">${escapeHtml(version.title || "未命名版本")}</span>
+        <span class="version-pill">${status === "current" ? "当前" : "即将开放"}</span>
+      </span>
+      <span class="version-copy">${escapeHtml(version.subtitle || "")}</span>
+    `;
+    button.addEventListener("click", () => onVersionClick(version));
+
+    item.appendChild(button);
+    fragment.appendChild(item);
+  });
+
+  dom.versionList.appendChild(fragment);
+}
+
+function onVersionClick(version) {
+  if ((version.status || "current") === "current") {
+    closeSidebar();
+    scrollPlayerIntoView();
+    return;
+  }
+
+  showToast("版本尚未开放", `${version.title} 还在整理中，之后会上线。`);
+}
+
+function scrollPlayerIntoView() {
+  const playerPanel = document.querySelector(".panel-player");
+  if (!playerPanel) {
+    return;
+  }
+  playerPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function openSidebar() {
+  state.sidebarOpen = true;
+  document.body.classList.add("sidebar-open");
+  dom.sidebarBackdrop.hidden = false;
+}
+
+function closeSidebar() {
+  state.sidebarOpen = false;
+  document.body.classList.remove("sidebar-open");
+  dom.sidebarBackdrop.hidden = true;
 }
 
 function showToast(title, copy) {

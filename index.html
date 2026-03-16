@@ -23,6 +23,14 @@
         <p class="hero-copy" id="site-description">
           每天东八区早上 6:00 开始，同步音频进度、字幕滚动与在线名单。
         </p>
+        <div class="hero-actions mobile-only">
+          <button class="button button-primary" id="quick-join-button" type="button">
+            开始共修
+          </button>
+          <button class="button" id="sidebar-toggle-button" type="button">
+            版本与名单
+          </button>
+        </div>
         <div class="hero-meta">
           <div class="meta-pill">
             <span class="meta-label">时区</span>
@@ -125,19 +133,42 @@
         </section>
 
         <aside class="panel panel-side">
-          <div class="panel-head">
+          <div class="sidebar-header">
             <div>
-              <p class="panel-kicker">在场共修</p>
-              <h2>在线名单</h2>
+              <p class="panel-kicker">Practice Rail</p>
+              <h2>共修侧栏</h2>
             </div>
-            <span class="count-badge" id="attendee-count">0 人</span>
+            <button class="button button-ghost sidebar-close" id="sidebar-close-button" type="button">
+              关闭
+            </button>
           </div>
 
-          <ul class="attendee-list" id="attendee-list">
-            <li class="attendee-empty">尚未加入共修。</li>
-          </ul>
+          <section class="side-section">
+            <div class="panel-head panel-head-tight">
+              <div>
+                <p class="panel-kicker">课程版本</p>
+                <h2>早课版本</h2>
+              </div>
+            </div>
+            <ul class="version-list" id="version-list">
+              <li class="version-empty">当前只有这一版共修。</li>
+            </ul>
+          </section>
 
-          <div class="notes">
+          <section class="side-section">
+            <div class="panel-head panel-head-tight">
+              <div>
+                <p class="panel-kicker">在场共修</p>
+                <h2>在线名单</h2>
+              </div>
+              <span class="count-badge" id="attendee-count">0 人</span>
+            </div>
+            <ul class="attendee-list" id="attendee-list">
+              <li class="attendee-empty">尚未加入共修。</li>
+            </ul>
+          </section>
+
+          <div class="notes side-section">
             <h3>共修说明</h3>
             <ul>
               <li>请输入名字或法名后加入共修。</li>
@@ -148,6 +179,14 @@
         </aside>
       </main>
     </div>
+
+    <button
+      class="sidebar-backdrop"
+      id="sidebar-backdrop"
+      type="button"
+      hidden
+      aria-label="关闭侧栏"
+    ></button>
 
     <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
 
