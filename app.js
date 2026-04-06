@@ -18,6 +18,7 @@ const state = {
   modalOpen: false,
   autoJoinPending: false,
   sidebarOpen: false,
+  activeVersionId: localStorage.getItem("gongxiu:activeVersion") || "",
 };
 
 const dom = {};
@@ -30,6 +31,7 @@ async function init() {
   renderPracticeVersions();
   bindEvents();
   dom.autoStartToggle.checked = state.autoStartEnabled;
+  restoreActiveVersion();
   dom.audio.src = config.audioUrl || "";
   dom.audio.load();
   restoreIdentity();
@@ -738,6 +740,25 @@ function onBeforeUnload() {
   clearTimeout(state.autoJoinTimerId);
 }
 
+function restoreActiveVersion() {
+  const versions = config.practiceVersions || [];
+  if (!versions.length) {
+    return;
+  }
+
+  const savedId = state.activeVersionId;
+  const saved = savedId ? versions.find((v) => v.id === savedId) : null;
+  const active = saved && saved.audioUrl ? saved : versions[0];
+
+  state.activeVersionId = active.id;
+  if (active.audioUrl) {
+    config.audioUrl = active.audioUrl;
+  }
+  if (active.lyricsUrl) {
+    config.lyricsUrl = active.lyricsUrl;
+  }
+}
+
 function renderPracticeVersions() {
   const versions = Array.isArray(config.practiceVersions) && config.practiceVersions.length
     ? config.practiceVersions
@@ -755,15 +776,18 @@ function renderPracticeVersions() {
 
   versions.forEach((version) => {
     const item = document.createElement("li");
+    const isCurrent = version.id === state.activeVersionId;
     const status = version.status || "current";
-    item.className = `version-item ${status === "current" ? "is-current" : "is-coming"}`;
+    item.className = `version-item ${isCurrent ? "is-current" : status === "coming" ? "is-coming" : ""}`;
+
+    const pillText = isCurrent ? "当前" : status === "coming" ? "即将开放" : "可用";
 
     const button = document.createElement("button");
     button.type = "button";
     button.innerHTML = `
       <span class="version-title-row">
         <span class="version-title">${escapeHtml(version.title || "未命名版本")}</span>
-        <span class="version-pill">${status === "current" ? "当前" : "即将开放"}</span>
+        <span class="version-pill">${pillText}</span>
       </span>
       <span class="version-copy">${escapeHtml(version.subtitle || "")}</span>
     `;
@@ -777,13 +801,49 @@ function renderPracticeVersions() {
 }
 
 function onVersionClick(version) {
-  if ((version.status || "current") === "current") {
+  if (version.status === "coming") {
+    showToast("版本尚未开放", `${version.title} 还在整理中，之后会上线。`);
+    return;
+  }
+
+  if (version.id === state.activeVersionId) {
     closeSidebar();
     scrollPlayerIntoView();
     return;
   }
 
-  showToast("版本尚未开放", `${version.title} 还在整理中，之后会上线。`);
+  switchVersion(version);
+}
+
+async function switchVersion(version) {
+  state.activeVersionId = version.id;
+  localStorage.setItem("gongxiu:activeVersion", version.id);
+
+  if (version.audioUrl) {
+    config.audioUrl = version.audioUrl;
+  }
+  if (version.lyricsUrl) {
+    config.lyricsUrl = version.lyricsUrl;
+  }
+
+  state.sessionDurationSeconds = 0;
+
+  dom.audio.pause();
+  dom.audio.src = config.audioUrl;
+  dom.audio.load();
+
+  state.lyrics = [];
+  state.activeLyricIndex = -1;
+  await loadLyrics();
+
+  updateAudioNote();
+  updateDurationUi();
+  updateSessionState();
+  renderPracticeVersions();
+
+  closeSidebar();
+  scrollPlayerIntoView();
+  showToast("已切换", `当前版本：${version.title}`);
 }
 
 function scrollPlayerIntoView() {

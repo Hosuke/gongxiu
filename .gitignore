@@ -1,0 +1,14 @@
+# 定课原始素材（体积大，不入库）
+定课/
+
+# 处理脚本临时文件
+.dingke-tmp/
+
+# macOS
+.DS_Store
+
+# Whisper 原始输出（开发参考用）
+assets/*-raw.json
+
+# 处理脚本（开发用）
+scripts/
