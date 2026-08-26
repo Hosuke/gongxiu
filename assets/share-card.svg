@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" role="img" aria-labelledby="title desc">
+  <title id="title">皈依共修</title>
+  <desc id="desc">莲花与佛光图案，配以每日早上六点同步共修信息。</desc>
+  <defs>
+    <linearGradient id="copy-panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7efdc" stop-opacity="0"/>
+      <stop offset="0.38" stop-color="#f7efdc" stop-opacity="0.82"/>
+      <stop offset="1" stop-color="#f7efdc" stop-opacity="0.98"/>
+    </linearGradient>
+  </defs>
+  <image href="share-visual.png" width="1200" height="1200" preserveAspectRatio="xMidYMid slice"/>
+  <rect y="830" width="1200" height="370" fill="url(#copy-panel)"/>
+  <rect x="92" y="1002" width="88" height="8" rx="4" fill="#6a8b4d"/>
+  <text x="92" y="955" fill="#3d2f1f" font-family="Songti SC, Songti TC, serif" font-size="112" font-weight="700" letter-spacing="6">皈依共修</text>
+  <text x="92" y="1082" fill="#77644d" font-family="PingFang SC, PingFang TC, sans-serif" font-size="36" font-weight="500" letter-spacing="3">每日 06:00 · 同步共修</text>
+  <text x="92" y="1142" fill="#b88645" font-family="PingFang SC, PingFang TC, sans-serif" font-size="25" font-weight="600" letter-spacing="4">STPT.TOP</text>
+</svg>

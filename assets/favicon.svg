@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">皈依共修莲花标志</title>
+  <rect width="64" height="64" rx="14" fill="#f7efdc"/>
+  <circle cx="32" cy="20" r="9" fill="#b88645"/>
+  <path d="M32 12a15 15 0 0 1 12 24" fill="none" stroke="#b88645" stroke-width="2.8" stroke-linecap="round"/>
+  <path d="M32 12a15 15 0 0 0-12 24" fill="none" stroke="#b88645" stroke-width="2.8" stroke-linecap="round"/>
+  <g fill="#6a8b4d" stroke="#3d2f1f" stroke-width="2.4" stroke-linejoin="round">
+    <path d="M31.9 52.5C23.7 45.1 23.6 34 32 25.2c8.4 8.8 8.3 19.9-.1 27.3Z"/>
+    <path d="M30.2 51.8C19.6 50.8 13.4 44 12.1 34c10.2-.1 17.1 6.4 18.1 17.8Z"/>
+    <path d="M33.8 51.8C44.4 50.8 50.6 44 51.9 34c-10.2-.1-17.1 6.4-18.1 17.8Z"/>
+    <path d="M28.5 53.2c-8.7 4.1-16.3 2.3-21.4-4.3 8.2-4.8 16.6-3.1 21.4 4.3Z"/>
+    <path d="M35.5 53.2c8.7 4.1 16.3 2.3 21.4-4.3-8.2-4.8-16.6-3.1-21.4 4.3Z"/>
+  </g>
+</svg>

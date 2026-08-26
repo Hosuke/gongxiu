@@ -10,6 +10,7 @@ window.APP_CONFIG = {
   attendeeVisibleWindowMs: 90000,
   lyricsUrl: "./assets/guiyi.lrc",
   audioUrl: "./assets/audio/guiyi.mp3",
+  defaultPracticeVersionId: "guiyi",
   practiceVersions: [
     {
       id: "guiyi",

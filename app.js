@@ -28,10 +28,10 @@ document.addEventListener("DOMContentLoaded", init);
 async function init() {
   cacheDom();
   applySiteCopy();
+  restoreActiveVersion();
   renderPracticeVersions();
   bindEvents();
   dom.autoStartToggle.checked = state.autoStartEnabled;
-  restoreActiveVersion();
   dom.audio.src = config.audioUrl || "";
   dom.audio.load();
   restoreIdentity();
@@ -154,7 +154,7 @@ async function loadLyrics() {
     updateSessionState();
   } catch (error) {
     console.error(error);
-    renderLyricsEmpty("字幕加载失败，请确认 `assets/guiyi.lrc` 是否存在。");
+    renderLyricsEmpty(`字幕加载失败，请确认 ${config.lyricsUrl} 是否存在。`);
   }
 }
 
@@ -748,7 +748,10 @@ function restoreActiveVersion() {
 
   const savedId = state.activeVersionId;
   const saved = savedId ? versions.find((v) => v.id === savedId) : null;
-  const active = saved && saved.audioUrl ? saved : versions[0];
+  const configuredDefault = versions.find(
+    (version) => version.id === config.defaultPracticeVersionId && version.audioUrl
+  );
+  const active = saved && saved.audioUrl ? saved : configuredDefault || versions[0];
 
   state.activeVersionId = active.id;
   if (active.audioUrl) {

@@ -15,6 +15,7 @@
 - `styles.css`: 视觉样式
 - `app.js`: 播放、字幕、倒数、在线名单逻辑
 - `assets/guiyi.lrc`: 字幕时间轴
+- `assets/badaren.lrc`: 八大人觉经版字幕时间轴
 - `assets/site-config.js`: 页面配置
 
 ## GitHub Pages 可行性
@@ -48,13 +49,14 @@ http://localhost:4173
 
 ## 音频配置
 
-默认配置指向：
+默认配置指向八大人觉经版：
 
 ```text
-./assets/audio/guiyi.mp3
+./assets/audio/badaren.mp3
 ```
 
-请把你的音频文件放到这个路径，或者直接改 `assets/site-config.js` 里的 `audioUrl` 为你自己的 `HTTPS` 地址。
+标准皈依版仍可在页面侧栏切换。可通过 `assets/site-config.js` 中的
+`defaultPracticeVersionId`、`audioUrl` 与 `lyricsUrl` 调整默认版本。
 
 如果你部署在 `https://<user>.github.io/...`，音频也必须是 `HTTPS`，不能用 `HTTP`，否则浏览器会拦截混合内容。
 
