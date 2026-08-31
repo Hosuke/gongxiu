@@ -9,7 +9,7 @@ window.APP_CONFIG = {
   heartbeatIntervalMs: 20000,
   attendeeVisibleWindowMs: 90000,
   defaultPracticeVersionId: "badaren",
-  lyricsUrl: "./assets/badaren.lrc?v=20260831-1",
+  lyricsUrl: "./assets/badaren.lrc?v=20260831-2",
   audioUrl: "./assets/audio/badaren.mp3",
   practiceVersions: [
     {
@@ -18,7 +18,7 @@ window.APP_CONFIG = {
       subtitle: "皈依共修 · 八大人觉经版仪轨",
       status: "current",
       audioUrl: "./assets/audio/badaren.mp3",
-      lyricsUrl: "./assets/badaren.lrc?v=20260831-1",
+      lyricsUrl: "./assets/badaren.lrc?v=20260831-2",
     },
     {
       id: "guiyi",
