@@ -17,6 +17,8 @@
 - `assets/guiyi.lrc`: 字幕时间轴
 - `assets/badaren.lrc`: 八大人觉经版字幕时间轴
 - `assets/site-config.js`: 页面配置
+- `mindfulness/`: 「五处用心」日常正念练习页与播放器
+- `assets/audio/mindfulness/`: 起床、洗漱、为食、洗碗、打扫五段练习音频
 
 ## GitHub Pages 可行性
 
